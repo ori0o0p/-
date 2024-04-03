@@ -187,6 +187,10 @@
         }
 
         setTime(hours, minutes, seconds) {
+            hours = hours < 10 ? `0${hours}` : hours;
+            minutes = minutes < 10 ? `0${minutes}` : minutes;
+            seconds = seconds < 10 ? `0${seconds}` : seconds;
+            
             return `${hours}시 ${minutes}분 ${seconds}초`;
         }
 
@@ -200,9 +204,8 @@
             const minutes = date.getMinutes();
             const seconds = date.getSeconds();
 
-            if ((hours < 14 || hours > 18) && minutes === 29 && seconds === 39) {
-                alert('쉬는 시간까지 20초 남음');
-            } else if ((hours >= 14 && hours <= 18) && minutes === 19 && seconds === 39) {
+            if ((hours < 14 || hours > 18) && minutes === 29 && seconds === 39 ||
+                (hours >= 14 && hours <= 18) && minutes === 19 && seconds === 39) {
                 alert('쉬는 시간까지 20초 남음');
             }
         }
@@ -218,15 +221,16 @@
         changeVideo() {
             if (this.links.length === 0) {
                 alert('직캠이 존재하지 않습니다.');
-            } else {
-                let link = null;
-                do {
-                    link = this.links[Math.floor(Math.random() * this.links.length)];
-                } while (link === this.cacheLink);
-
-                document.querySelector("iframe").src = link;
-                this.cacheLink = link;
+                return;
             }
+
+            let newLink;
+            do {
+                newLink = this.links[Math.floor(Math.random() * this.links.length)];
+            } while (newLink === this.cacheLink);
+
+            document.querySelector("iframe").src = newLink;
+            this.cacheLink = newLink;
         }
 
         addLinks() {
@@ -235,13 +239,10 @@
             const regex1 = /^https:\/\/www\.youtube\.com\/embed\/[\w-]+\?si=[\w-]+$/;
             const regex2 = /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/;
 
-            if (regex1.test(url)) {
-                this.links.push(url);
-                if (this.isShow) {
-                    this.allLinks();
-                }
-            } else if (regex2.test(url)) {
-                this.links.push(url.replace('watch?v=', 'embed/'));
+            if (regex1.test(url) || regex2.test(url)) {
+                const newUrl = regex1.test(url) ? url : url.replace('watch?v=', 'embed/');
+                this.links.push(newUrl);
+
                 if (this.isShow) {
                     this.allLinks();
                 }

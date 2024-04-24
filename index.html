@@ -10,8 +10,9 @@
         }
 
         body {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
@@ -85,9 +86,15 @@
         }
 
         #links {
+            margin-left: 10px;
             display: flex;
+            width: 660px;
             flex-wrap: wrap;
             justify-content: left;
+        }
+
+        #deleteButton {
+            width: 144px;
         }
 
     </style>
@@ -118,22 +125,17 @@
 
 </div>
 
-<div id="links">
-    <!-- 영상 목록 -->
-</div>
-
 <div id="buttons">
-    <button>
-        모든 영상 확인
+    <button id="show_video">
+        영상 목록 열기
     </button>
-
-    <button>
-        숨기기
-    </button>
-
     <button>
         초기화
     </button>
+</div>
+
+<div id="links">
+    <!-- 영상 목록 -->
 </div>
 
 </body>
@@ -141,11 +143,15 @@
     class VideoPlayer {
         constructor() {
             this.links = [
-                "https://www.youtube.com/embed/sXeYkw4VE24",
+                "https://www.youtube.com/embed/7ZJwGLTzobE",
+                "https://www.youtube.com/embed/vIIns8goJ2s",
+                "https://www.youtube.com/embed/XsBTySANXjk",
+                "https://www.youtube.com/embed/_egznwKMoSI",
+                "https://www.youtube.com/embed/rl9-PPXkXLo",
                 "https://www.youtube.com/embed/stnXEC9Q3B4",
-                "https://www.youtube.com/embed/UAQT5Hgrm1Q",
-                "https://www.youtube.com/embed/FBx30Z3AEtQ",
-                "https://www.youtube.com/embed/LTyc7mwLNys"
+                "https://www.youtube.com/embed/SwDN0vzw_Fs",
+                "https://www.youtube.com/embed/Y4QUgcYMYJk",
+                "https://www.youtube.com/embed/geFx4DJU8oE"
             ]
             this.cacheLink = null;
             this.isShow = false;
@@ -256,27 +262,58 @@
         }
 
         allLinks() {
-            const linkDiv = document.querySelector('#links');
-            this.allLinksInit(linkDiv);
+            if (this.isShow) {
+                this.hideAllLinks()
+            } else {
+                const linkDiv = document.querySelector('#links')
+                this.allLinksInit(linkDiv)
 
-            this.links.forEach(link => {
-                const node = document.createElement('iframe');
-                node.style.width = '144px';
-                node.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-                node.referrerPolicy = "strict-origin-when-cross-origin";
-                node.src = link;
+                this.links.forEach((link, index) => {
+                    const videoContainer = document.createElement('div')
+                    videoContainer.style.margin = '10px'
+                    videoContainer.style.display = 'flex'
+                    videoContainer.style.flexDirection = 'column'
+                    videoContainer.style.alignItems = 'center'
 
-                linkDiv.appendChild(node);
-            });
-            this.isShow = true;
+                    const videoId = link.split('/embed/')[1]
+                    const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/0.jpg`
+
+                    const a = document.createElement('a')
+                    a.id = 'videoHref'
+                    a.href =  `https://www.youtube.com/watch?v=${videoId}`
+                    a.target = '_blank'
+
+                    const img = document.createElement('img')
+                    img.src = thumbnailUrl
+                    img.style.width = '144px'
+                    img.style.cursor = 'pointer'
+
+                    const deleteButton = document.createElement('button')
+                    deleteButton.id = 'deleteButton'
+                    deleteButton.textContent = '삭제'
+                    deleteButton.addEventListener('click', () => this.removeLink(index))
+
+                    videoContainer.appendChild(deleteButton)
+                    a.appendChild(img)
+
+                    videoContainer.appendChild(a)
+
+                    linkDiv.appendChild(videoContainer)
+                });
+                this.isShow = true;
+                document.querySelector('#show_video').textContent = '영상 목록 닫기';
+            }
+
+        }
+
+        removeLink(index) {
+            this.links.splice(index, 1);
+            this.allLinksInit(document.querySelector('#links'));
+            this.isShow = false;
+            this.allLinks();
         }
 
         allLinksInit(linkDiv) {
-            linkDiv.innerHTML = '';
-        }
-
-        hideAllLinks() {
-            const linkDiv = document.querySelector('#links');
             linkDiv.innerHTML = '';
         }
 
@@ -284,6 +321,14 @@
             this.links = [];
             this.hideAllLinks();
         }
+
+        hideAllLinks() {
+            const linkDiv = document.querySelector('#links');
+            linkDiv.innerHTML = '';
+            document.querySelector('#show_video').textContent = '영상 목록 열기';
+            this.isShow = false;
+        }
+
     }
 
     new VideoPlayer();
